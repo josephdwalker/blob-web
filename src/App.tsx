@@ -1,26 +1,36 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { FC, useCallback, useEffect, useState } from "react";
+import { Lobby } from "./Lobby";
+import { useNavigate } from "react-router-dom";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+export const App: FC = () => {
+    const [pageState, setPageState] = useState("login");
+    const [username, setUsername] = useState("");
+    const navigate = useNavigate();
 
-export default App;
+    const onSubmitClick = useCallback(() => {
+        if (username !== "") {
+            navigate(`lobby`);
+            setPageState("lobby");
+        }
+    }, [navigate, username]);
+
+    useEffect(() => {
+        navigate(``);
+    }, []);
+
+    return pageState === "login" ? (
+        <div className="login">
+            <div>Username:</div>
+            <input
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                onKeyDown={(event) => {
+                    if (event.key === "Enter") onSubmitClick();
+                }}
+            />
+            <button onClick={onSubmitClick}>Enter</button>
+        </div>
+    ) : (
+        <Lobby username={username} />
+    );
+};

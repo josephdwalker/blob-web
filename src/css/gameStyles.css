@@ -1,0 +1,40 @@
+.arena {
+    display: flex;
+    flex-direction: column;
+    float: left;
+    width: 75%;
+}
+
+.chat {
+    float: right;
+    width: 25%;
+}
+
+.messages {
+    height: 90vh;
+    overflow-y: scroll;
+}
+
+.card {
+    width: 60px;
+    padding: 10px;
+}
+
+.submitBid {
+    padding-top: 10px;
+    padding-bottom: 30px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border: 1px solid black;
+    padding: 5px;
+}
+
+.bid {
+    padding-top: 10px;
+}
