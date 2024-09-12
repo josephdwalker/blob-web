@@ -1,9 +1,12 @@
 import { HubConnection } from "@microsoft/signalr";
 import { FC, useCallback, useEffect, useState } from "react";
 import { CumulativeScores } from "./CumulativeScores";
+import { ScoresTable } from "./ScoresTable";
+import { Chat } from "./Chat";
+import { Bidding } from "./Bidding";
 import "./css/gameStyles.css";
 
-const url = "https://localhost:44384/api";
+export const url = "https://localhost:44384/api";
 
 export interface GameInterface {
     username: string;
@@ -24,8 +27,6 @@ export const Game: FC<GameInterface> = ({ username, connection }) => {
     const [canStartGame, setCanStartGame] = useState<boolean>(true);
     const [readyForNextRound, setReadyForNextRound] = useState<boolean>(false);
     const [scores, setScores] = useState<CumulativeScores[]>([]);
-    const [textValue, setTextValue] = useState<string>("");
-    const [messages, setMessages] = useState<string[]>([]);
 
     const onReceiveGameDetails = useCallback(
         (gameId: number, players: string[]) => {
@@ -99,21 +100,6 @@ export const Game: FC<GameInterface> = ({ username, connection }) => {
         }
     }, [gameID]);
 
-    const submitBid = useCallback(async () => {
-        if (nextPlayerToBid === playerPosition) {
-            var response = await fetch(
-                `${url}/Bids/${gameID}/gameID/${playerPosition}/player/${bid}/bid/setBid`
-            ).then((response) => {
-                if (response.status === 400) {
-                    return response.text();
-                }
-            });
-            if (response) {
-                alert(response);
-            }
-        }
-    }, [bid, gameID, nextPlayerToBid, playerPosition]);
-
     const fetchScores = useCallback(() => {
         if (gameID) {
             fetch(`${url}/Score/${gameID}/gameID/getScores`)
@@ -174,51 +160,18 @@ export const Game: FC<GameInterface> = ({ username, connection }) => {
         fetchBids();
     }, [fetchBids, players.length]);
 
-    const onReceiveMessage = useCallback(
-        (message: string) => {
-            setMessages([...messages, message]);
-        },
-        [messages]
-    );
-
-    const onSendClick = useCallback(async () => {
-        if (connection && textValue !== "") {
-            await connection.send(
-                "SendGameChatMessage",
-                gameID,
-                username,
-                textValue
-            );
-        }
-        setTextValue("");
-    }, [connection, gameID, textValue, username]);
-
     useEffect(() => {
         if (connection) {
             connection.on("GameDetails", onReceiveGameDetails);
             connection.on("BidUpdate", onBidUpdate);
             connection.on("CardsUpdate", onCardUpdate);
-            connection.on("GameChatMessage", onReceiveMessage);
         }
     }, [
         connection,
         onReceiveGameDetails,
         onBidUpdate,
-        onReceiveMessage,
         onCardUpdate,
     ]);
-
-    const increment = useCallback(() => {
-        if (bid < cards?.length) {
-            setBid(bid + 1);
-        }
-    }, [bid, cards?.length]);
-
-    const decrement = useCallback(() => {
-        if (bid > 0) {
-            setBid(bid - 1);
-        }
-    }, [bid]);
 
     return (
         <div>
@@ -227,6 +180,21 @@ export const Game: FC<GameInterface> = ({ username, connection }) => {
                     <button disabled={players.length < 2} onClick={startGame}>
                         Start Game
                     </button>
+                )}
+                {!readyForNextRound && (
+                    <div className="hand">
+                        <div>
+                            {cards.map((card, j) => (
+                                <img
+                                    className="card"
+                                    key={j.toString()}
+                                    onClick={() => playCard(card)}
+                                    src={require(`./Cards/${card}.png`)}
+                                    alt="buttonpng"
+                                />
+                            ))}
+                        </div>
+                    </div>
                 )}
                 <div className="players">
                     <div>
@@ -253,66 +221,18 @@ export const Game: FC<GameInterface> = ({ username, connection }) => {
                         </table>
                     </div>
                 </div>
-                {!readyForNextRound && (
-                    <div className="hand">
-                        {nextPlayerToPlay >= 0 && (
-                            <h2>
-                                {players[nextPlayerToPlay]} turn to play a card
-                            </h2>
-                        )}
-                        <div>
-                            {cards.map((card, j) => (
-                                <img
-                                    className="card"
-                                    key={j.toString()}
-                                    onClick={() => playCard(card)}
-                                    src={require(`./Cards/${card}.png`)}
-                                    alt="buttonpng"
-                                />
-                            ))}
-                        </div>
-                    </div>
+                {nextPlayerToPlay >= 0 && (
+                    <h2>
+                        {players[nextPlayerToPlay]} turn to play a card
+                    </h2>
                 )}
-                <div className="bid">
-                    {nextPlayerToBid >= 0 && !readyForNextRound && (
-                        <h2>{players[nextPlayerToBid]} turn to bid</h2>
-                    )}
-                    <div>
-                        <button
-                            id="increment"
-                            onClick={increment}
-                            disabled={
-                                nextPlayerToBid !== playerPosition ||
-                                readyForNextRound
-                            }
-                        >
-                            Increment
-                        </button>
-                        <input type="number" value={bid} readOnly={true} />
-                        <button
-                            id="decrement"
-                            onClick={decrement}
-                            disabled={
-                                nextPlayerToBid !== playerPosition ||
-                                readyForNextRound
-                            }
-                        >
-                            Decrement
-                        </button>
-                    </div>
-                    <div className="submitBid">
-                        <button
-                            onClick={submitBid}
-                            disabled={
-                                nextPlayerToBid !== playerPosition ||
-                                readyForNextRound
-                            }
-                        >
-                            submit bid
-                        </button>
-                    </div>
+                {nextPlayerToBid >= 0 && !readyForNextRound && (
+                    <h2>{players[nextPlayerToBid]} turn to bid</h2>
+                )}
+                <div className="bidding">
+                    <Bidding bid={bid} setBid={setBid} gameID={gameID} playerPosition={playerPosition} nextPlayerToBid={nextPlayerToBid} maxBid={cards.length} readyForNextRound={readyForNextRound}/>
                 </div>
-                <div className="nextRound">
+                <div className="startNextRound">
                     {readyForNextRound && (
                         <button onClick={startNextRound}>
                             Start Next Round
@@ -320,113 +240,11 @@ export const Game: FC<GameInterface> = ({ username, connection }) => {
                     )}
                 </div>
                 <div className="scores">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tricks</th>
-                                <th>Trumps</th>
-                                <th colSpan={2}>{players[0]}</th>
-                                {players.length >= 2 && (
-                                    <th colSpan={2}>{players[1]}</th>
-                                )}
-                                {players.length >= 3 && (
-                                    <th colSpan={2}>{players[2]}</th>
-                                )}
-                                {players.length >= 4 && (
-                                    <th colSpan={2}>{players[3]}</th>
-                                )}
-                                {players.length >= 5 && (
-                                    <th colSpan={2}>{players[4]}</th>
-                                )}
-                                {players.length === 6 && (
-                                    <th colSpan={2}>{players[5]}</th>
-                                )}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {scores.map((score, j) => (
-                                <tr key={`row-${j}`}>
-                                    <td key={`tricks-${j}`}>{score.tricks}</td>
-                                    <td key={`trumps-${j}`}>
-                                        {score.trumpSuit}
-                                    </td>
-                                    <td key={`playerOne-${j}`}>
-                                        {score.playerOneScore}
-                                    </td>
-                                    <td key={`playerOneCumulative-${j}`}>
-                                        {score.playerOneCumulativeScore}
-                                    </td>
-                                    <td key={`playerTwo-${j}`}>
-                                        {score.playerTwoScore}
-                                    </td>
-                                    <td key={`playerTwoCumulative-${j}`}>
-                                        {score.playerTwoCumulativeScore}
-                                    </td>
-                                    {players.length >= 3 && (
-                                        <td key={`playerThree-${j}`}>
-                                            {score.playerThreeScore}
-                                        </td>
-                                    )}
-                                    {players.length >= 3 && (
-                                        <td key={`playerThreeCumulative-${j}`}>
-                                            {score.playerThreeCumulativeScore}
-                                        </td>
-                                    )}
-                                    {players.length >= 4 && (
-                                        <td key={`playerFour-${j}`}>
-                                            {score.playerFourScore}
-                                        </td>
-                                    )}
-                                    {players.length >= 4 && (
-                                        <td key={`playerFourCumulative-${j}`}>
-                                            {score.playerFourCumulativeScore}
-                                        </td>
-                                    )}
-                                    {players.length >= 5 && (
-                                        <td key={`playerFive-${j}`}>
-                                            {score.playerFourScore}
-                                        </td>
-                                    )}
-                                    {players.length >= 5 && (
-                                        <td key={`playerFiveCumulative-${j}`}>
-                                            {score.playerFourCumulativeScore}
-                                        </td>
-                                    )}
-                                    {players.length === 6 && (
-                                        <td key={`playerSix-${j}`}>
-                                            {score.playerFourScore}
-                                        </td>
-                                    )}
-                                    {players.length === 6 && (
-                                        <td key={`playerSixCumulative-${j}`}>
-                                            {score.playerFourCumulativeScore}
-                                        </td>
-                                    )}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <ScoresTable players={players} scores={scores} />
                 </div>
             </div>
             <div className="chat">
-                <div>
-                    <input
-                        type="text"
-                        value={textValue}
-                        onChange={(event) => {
-                            setTextValue(event.target.value);
-                        }}
-                        onKeyDown={(event) => {
-                            if (event.key === "Enter") onSendClick();
-                        }}
-                    />
-                    <button onClick={onSendClick}>Send</button>
-                </div>
-                <div className="messages">
-                    {messages.map((message, index) => (
-                        <div key={index}>{message}</div>
-                    ))}
-                </div>
+                <Chat gameID={gameID} username={username} connection={connection}/>
             </div>
         </div>
     );

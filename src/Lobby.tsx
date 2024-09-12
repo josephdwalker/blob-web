@@ -1,7 +1,6 @@
 import { FC, useCallback, useEffect, useState } from "react";
 import { Game } from "./Game";
 import { useSignalRConnection } from "./useSignalRConnection";
-import { useNavigate } from "react-router-dom";
 
 export interface LobbyProps {
     username: string;
@@ -13,10 +12,8 @@ export const Lobby: FC<LobbyProps> = ({ username }) => {
     const [messages, setMessages] = useState<string[]>([]);
     const [OpponentsUsernames, setOpponentsUsernames] = useState<string[]>([]);
     const connection = useSignalRConnection("/GameHub", username);
-    const navigate = useNavigate();
 
     const onCreateGame = async () => {
-        navigate(`/${username}-game`);
         setInLobby(false);
         if (connection) {
             await connection.send("CreateGame", username);
@@ -24,7 +21,6 @@ export const Lobby: FC<LobbyProps> = ({ username }) => {
     };
 
     const onJoinGame = async (opponentUsername: string) => {
-        navigate(`/${opponentUsername}-game`);
         setInLobby(false);
         if (connection) {
             await connection.send("JoinGame", opponentUsername, username);

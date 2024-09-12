@@ -1,22 +1,15 @@
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useState } from "react";
 import { Lobby } from "./Lobby";
-import { useNavigate } from "react-router-dom";
 
 export const App: FC = () => {
     const [pageState, setPageState] = useState("login");
     const [username, setUsername] = useState("");
-    const navigate = useNavigate();
 
     const onSubmitClick = useCallback(() => {
         if (username !== "") {
-            navigate(`lobby`);
             setPageState("lobby");
         }
-    }, [navigate, username]);
-
-    useEffect(() => {
-        navigate(``);
-    }, []);
+    }, [username]);
 
     return pageState === "login" ? (
         <div className="login">
