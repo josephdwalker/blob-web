@@ -3,7 +3,7 @@ import { FC, useCallback, useEffect, useState } from "react";
 import "./css/gameStyles.css";
 
 export interface ChatProps {
-    gameID?: number,
+    gameID?: string,
     username: string,
     connection: HubConnection | undefined;
 };

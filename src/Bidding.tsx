@@ -3,7 +3,7 @@ import { url } from "./Game";
 import "./css/gameStyles.css";
 
 export interface BiddingProps {
-    gameID?: number;
+    gameID?: string;
     bid: number,
     setBid: React.Dispatch<React.SetStateAction<number>>,
     playerPosition?: number;

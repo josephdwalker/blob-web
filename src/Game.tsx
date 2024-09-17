@@ -14,7 +14,7 @@ export interface GameInterface {
 }
 
 export const Game: FC<GameInterface> = ({ username, connection }) => {
-    const [gameID, setGameId] = useState<number>();
+    const [gameID, setGameId] = useState<string>();
     const [cards, setCards] = useState<string[]>([]);
     const [playerPosition, setPlayerPosition] = useState<number>();
     const [players, setPlayers] = useState<string[]>([]);
@@ -29,7 +29,7 @@ export const Game: FC<GameInterface> = ({ username, connection }) => {
     const [scores, setScores] = useState<CumulativeScores[]>([]);
 
     const onReceiveGameDetails = useCallback(
-        (gameId: number, players: string[]) => {
+        (gameId: string, players: string[]) => {
             setGameId(gameId);
             setPlayers(players);
             setPlayerPosition(players.indexOf(username));
