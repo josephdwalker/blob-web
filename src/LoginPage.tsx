@@ -1,17 +1,17 @@
 import { FC, useCallback, useState } from "react";
-import { Lobby } from "./Lobby";
+import { useNavigate } from "react-router-dom";
 
-export const App: FC = () => {
-    const [pageState, setPageState] = useState("login");
+export const LoginPage: FC = () => {
+    const navigate = useNavigate();
     const [username, setUsername] = useState("");
 
     const onSubmitClick = useCallback(() => {
         if (username !== "") {
-            setPageState("lobby");
+            navigate("/lobby", {state: {username}})
         }
-    }, [username]);
+    }, [navigate, username]);
 
-    return pageState === "login" ? (
+    return (
         <div className="login">
             <div>Username:</div>
             <input
@@ -23,7 +23,5 @@ export const App: FC = () => {
             />
             <button onClick={onSubmitClick}>Enter</button>
         </div>
-    ) : (
-        <Lobby username={username} />
-    );
+    )
 };

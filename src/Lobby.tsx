@@ -1,12 +1,12 @@
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { Game } from "./Game";
 import { useSignalRConnection } from "./useSignalRConnection";
+import { useLocation } from "react-router-dom";
 
-export interface LobbyProps {
-    username: string;
-}
-
-export const Lobby: FC<LobbyProps> = ({ username }) => {
+export const Lobby: FC = () => {
+    const location = useLocation();
+    const username = useMemo(() => location.state.username, [location.state.username]);
+    
     const [inLobby, setInLobby] = useState(true);
     const [textValue, setTextValue] = useState("");
     const [messages, setMessages] = useState<string[]>([]);
