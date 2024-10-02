@@ -1,5 +1,5 @@
 import { FC } from "react"
-import { CumulativeScores } from "./CumulativeScores"
+import { CumulativeScores } from "./Models/CumulativeScores"
 import "./css/gameStyles.css";
 
 export interface ScoreProps {

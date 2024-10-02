@@ -3,8 +3,9 @@ import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 
 export const useSignalRConnection: (
     hubName: string,
-    username: string
-) => HubConnection | undefined = (hubName, username) => {
+    username: string,
+    gameID?: string
+) => HubConnection | undefined = (hubName, username, gameID) => {
     const [connection, setConnection] = useState<HubConnection>();
     const Url = "https://localhost:44384";
 
@@ -17,12 +18,12 @@ export const useSignalRConnection: (
         newConnection
             .start()
             .then(() => {
-                newConnection.invoke("Register", username);
+                newConnection.invoke("Register", username, gameID);
             })
             .catch((e: any) => console.log("Connection failed: ", e));
 
         setConnection(newConnection);
-    }, [hubName, username]);
+    }, [gameID, hubName, username]);
 
     return connection;
 };

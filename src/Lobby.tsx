@@ -1,41 +1,47 @@
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
-import { Game } from "./Game";
 import { useSignalRConnection } from "./useSignalRConnection";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { AvailableGames } from "./Models/AvailableGames";
+
+function generateString() {
+    const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i=0; i<12; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+}
 
 export const Lobby: FC = () => {
+    const navigate = useNavigate();
     const location = useLocation();
     const username = useMemo(() => location.state.username, [location.state.username]);
     
-    const [inLobby, setInLobby] = useState(true);
     const [textValue, setTextValue] = useState("");
     const [messages, setMessages] = useState<string[]>([]);
-    const [OpponentsUsernames, setOpponentsUsernames] = useState<string[]>([]);
-    const connection = useSignalRConnection("/GameHub", username);
+    const [games, setGames] = useState<AvailableGames[]>([]);
+    const connection = useSignalRConnection("/LobbyHub", username);
 
     const onCreateGame = async () => {
-        setInLobby(false);
-        if (connection) {
-            await connection.send("CreateGame", username);
-        }
+        var gameID = generateString();
+        await connection?.send("CreateGame", gameID, username);
+        navigate(`/${gameID}`, {state: {username, gameID}});
     };
 
-    const onJoinGame = async (opponentUsername: string) => {
-        setInLobby(false);
-        if (connection) {
-            await connection.send("JoinGame", opponentUsername, username);
-        }
+    const onJoinGame = async (gameID: string) => {
+        await connection?.send("JoinGame", gameID);
+        navigate(`/${gameID}`, {state: {username, gameID}});
     };
 
-    const onUpdateOpponents = useCallback((opponents: string[]) => {
-        setOpponentsUsernames(opponents);
+    const onUpdateOpponents = useCallback((games: AvailableGames[]) => {
+        setGames(games);
     }, []);
 
     const onSendClick = async () => {
-        if (connection && textValue !== "") {
-            await connection.send("SendChatMessage", username, textValue);
+        if (textValue !== "") {
+            await connection?.send("SendChatMessage", username, textValue);
+            setTextValue("");
         }
-        setTextValue("");
     };
 
     const onReceiveMessage = useCallback(
@@ -52,17 +58,17 @@ export const Lobby: FC = () => {
         }
     }, [connection, username, onReceiveMessage, onUpdateOpponents]);
 
-    return inLobby ? (
+    return (
         <div className="lobby">
             <div className="gameArea">
                 <button onClick={onCreateGame}>Create Game</button>
                 <h2>Available games</h2>
-                {OpponentsUsernames.map((opponentUsername) => (
+                {games.map((game, j) => (
                     <button
-                        key={opponentUsername}
-                        onClick={() => onJoinGame(opponentUsername)}
+                        key={j}
+                        onClick={() => onJoinGame(game.gameID)}
                     >
-                        {opponentUsername}
+                        {game.opponentUsername}
                     </button>
                 ))}
             </div>
@@ -86,10 +92,6 @@ export const Lobby: FC = () => {
                     ))}
                 </div>
             </div>
-        </div>
-    ) : (
-        <div>
-            <Game username={username} connection={connection} />
         </div>
     );
 };

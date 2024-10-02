@@ -1,20 +1,19 @@
-import { HubConnection } from "@microsoft/signalr";
-import { FC, useCallback, useEffect, useState } from "react";
-import { CumulativeScores } from "./CumulativeScores";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { CumulativeScores } from "./Models/CumulativeScores";
 import { ScoresTable } from "./ScoresTable";
 import { Chat } from "./Chat";
 import { Bidding } from "./Bidding";
 import "./css/gameStyles.css";
+import { useSignalRConnection } from "./useSignalRConnection";
+import { useLocation } from "react-router-dom";
 
 export const url = "https://localhost:44384/api";
 
-export interface GameInterface {
-    username: string;
-    connection: HubConnection | undefined;
-}
-
-export const Game: FC<GameInterface> = ({ username, connection }) => {
-    const [gameID, setGameId] = useState<string>();
+export const Game: FC = () => {
+    const location = useLocation();
+    const gameID = useMemo(() => location.state.gameID, [location.state.gameID]);
+    const username = useMemo(() => location.state.username, [location.state.username]);
+    
     const [cards, setCards] = useState<string[]>([]);
     const [playerPosition, setPlayerPosition] = useState<number>();
     const [players, setPlayers] = useState<string[]>([]);
@@ -28,9 +27,10 @@ export const Game: FC<GameInterface> = ({ username, connection }) => {
     const [readyForNextRound, setReadyForNextRound] = useState<boolean>(false);
     const [scores, setScores] = useState<CumulativeScores[]>([]);
 
+    const connection = useSignalRConnection("/GameHub", username, gameID);
+
     const onReceiveGameDetails = useCallback(
-        (gameId: string, players: string[]) => {
-            setGameId(gameId);
+        (players: string[]) => {
             setPlayers(players);
             setPlayerPosition(players.indexOf(username));
         },
