@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
+import { url } from "./Helper";
 
 export const useSignalRConnection: (
     hubName: string,
@@ -7,11 +8,10 @@ export const useSignalRConnection: (
     gameID?: string
 ) => HubConnection | undefined = (hubName, username, gameID) => {
     const [connection, setConnection] = useState<HubConnection>();
-    const Url = "https://localhost:44384";
 
     useEffect(() => {
         const newConnection = new HubConnectionBuilder()
-            .withUrl(`${Url}${hubName}`)
+            .withUrl(`${url}${hubName}`)
             .withAutomaticReconnect()
             .build();
 

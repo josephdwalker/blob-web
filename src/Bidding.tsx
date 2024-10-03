@@ -1,6 +1,6 @@
 import { FC, useCallback } from "react";
-import { url } from "./Game";
 import "./css/gameStyles.css";
+import { url } from "./Helper";
 
 export interface BiddingProps {
     gameID?: string;
@@ -28,7 +28,7 @@ export const Bidding: FC<BiddingProps> = ({ gameID, bid, setBid, playerPosition,
     const submitBid = useCallback(async () => {
         if (nextPlayerToBid === playerPosition) {
             var response = await fetch(
-                `${url}/Bids/${gameID}/gameID/${playerPosition}/player/${bid}/bid/setBid`
+                `${url}/api/Bids/${gameID}/gameID/${playerPosition}/player/${bid}/bid/setBid`
             ).then((response) => {
                 if (response.status === 400) {
                     return response.text();

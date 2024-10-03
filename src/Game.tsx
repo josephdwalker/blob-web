@@ -6,8 +6,7 @@ import { Bidding } from "./Bidding";
 import "./css/gameStyles.css";
 import { useSignalRConnection } from "./useSignalRConnection";
 import { useLocation } from "react-router-dom";
-
-export const url = "https://localhost:44384/api";
+import { url } from "./Helper";
 
 export const Game: FC = () => {
     const location = useLocation();
@@ -39,7 +38,7 @@ export const Game: FC = () => {
 
     const startGame = useCallback(() => {
         if (gameID) {
-            fetch(`${url}/Score/startGame`, {
+            fetch(`${url}/api/Score/startGame`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -57,7 +56,7 @@ export const Game: FC = () => {
     const fetchCards = useCallback(() => {
         if (gameID && playerPosition !== undefined) {
             fetch(
-                `${url}/Deck/${gameID}/gameID/${playerPosition}/player/getHand`
+                `${url}/api/Deck/${gameID}/gameID/${playerPosition}/player/getHand`
             )
                 .then((response) => response.json())
                 .then((data) => setCards(data));
@@ -68,7 +67,7 @@ export const Game: FC = () => {
         async (card: string) => {
             if (nextPlayerToPlay === playerPosition) {
                 var response = await fetch(
-                    `${url}/Deck/${gameID}/gameID/${playerPosition}/player/${leadingCard}/leadingCard/${card}/card/playCard`
+                    `${url}/api/Deck/${gameID}/gameID/${playerPosition}/player/${leadingCard}/leadingCard/${card}/card/playCard`
                 ).then((response) => {
                     if (response.status === 200) {
                         var newCards = cards.filter((c) => c !== card);
@@ -94,7 +93,7 @@ export const Game: FC = () => {
 
     const fetchBids = useCallback(() => {
         if (gameID) {
-            fetch(`${url}/Bids/${gameID}/gameID/getBids`)
+            fetch(`${url}/api/Bids/${gameID}/gameID/getBids`)
                 .then((response) => response.json())
                 .then((data) => setBids(data));
         }
@@ -102,7 +101,7 @@ export const Game: FC = () => {
 
     const fetchScores = useCallback(() => {
         if (gameID) {
-            fetch(`${url}/Score/${gameID}/gameID/getScores`)
+            fetch(`${url}/api/Score/${gameID}/gameID/getScores`)
                 .then((response) => response.json())
                 .then((data) => {
                     if (data.length !== 0) {
