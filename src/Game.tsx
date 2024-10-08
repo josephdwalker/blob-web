@@ -19,7 +19,6 @@ export const Game: FC = () => {
     const [bid, setBid] = useState<number>(0);
     const [bids, setBids] = useState<number[]>([]);
     const [nextPlayerToBid, setNextPlayerToBid] = useState<number>(-1);
-    const [leadingCard, setLeadingCard] = useState<boolean>(false);
     const [playedCards, setPlayedCards] = useState<string[][]>([]);
     const [nextPlayerToPlay, setNextPlayerToPlay] = useState<number>(-1);
     const [canStartGame, setCanStartGame] = useState<boolean>(true);
@@ -65,9 +64,8 @@ export const Game: FC = () => {
 
     const playCard = useCallback(
         async (card: string) => {
-            if (nextPlayerToPlay === playerPosition) {
                 var response = await fetch(
-                    `${url}/api/Deck/${gameID}/gameID/${playerPosition}/player/${leadingCard}/leadingCard/${card}/card/playCard`
+                    `${url}/api/Deck/${gameID}/gameID/${playerPosition}/player/${card}/card/playCard`
                 ).then((response) => {
                     if (response.status === 200) {
                         var newCards = cards.filter((c) => c !== card);
@@ -80,15 +78,8 @@ export const Game: FC = () => {
                 if (response) {
                     alert(response);
                 }
-            } else {
-                if (nextPlayerToPlay === -1) {
-                    alert("Bidding is not finished");
-                } else {
-                    alert("Not your turn to play a card");
-                }
-            }
         },
-        [cards, gameID, leadingCard, nextPlayerToPlay, playerPosition]
+        [cards, gameID, playerPosition]
     );
 
     const fetchBids = useCallback(() => {
@@ -131,12 +122,10 @@ export const Game: FC = () => {
     const onCardUpdate = useCallback(
         (
             nextPlayer: number,
-            leadingCard: boolean,
             previousPlayer: number,
             previousCard: string
         ) => {
             setNextPlayerToPlay(nextPlayer);
-            setLeadingCard(leadingCard);
             var cards = playedCards;
             cards[previousPlayer].push(previousCard);
             setPlayedCards(cards);
