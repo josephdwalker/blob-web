@@ -27,7 +27,7 @@ export const ScoresTable: FC<ScoreProps> = ({players, scores}) => {
                     {players.length >= 5 && (
                         <th colSpan={2}>{players[4]}</th>
                     )}
-                    {players.length === 6 && (
+                    {players.length >= 6 && (
                         <th colSpan={2}>{players[5]}</th>
                     )}
                 </tr>
@@ -81,12 +81,12 @@ export const ScoresTable: FC<ScoreProps> = ({players, scores}) => {
                                 {score.playerFourCumulativeScore}
                             </td>
                         )}
-                        {players.length === 6 && (
+                        {players.length >= 6 && (
                             <td key={`playerSix-${j}`}>
                                 {score.playerFourScore}
                             </td>
                         )}
-                        {players.length === 6 && (
+                        {players.length >= 6 && (
                             <td key={`playerSixCumulative-${j}`}>
                                 {score.playerFourCumulativeScore}
                             </td>

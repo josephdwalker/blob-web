@@ -7,6 +7,7 @@ import "./css/gameStyles.css";
 import { useSignalRConnection } from "./useSignalRConnection";
 import { useLocation } from "react-router-dom";
 import { url } from "./Helper";
+import { ActiveHand } from "./Models/ActiveHand";
 
 export const Game: FC = () => {
     const location = useLocation();
@@ -19,7 +20,7 @@ export const Game: FC = () => {
     const [bid, setBid] = useState<number>(0);
     const [bids, setBids] = useState<number[]>([]);
     const [nextPlayerToBid, setNextPlayerToBid] = useState<number>(-1);
-    const [playedCards, setPlayedCards] = useState<string[][]>([]);
+    const [activeHands, setActiveHands] = useState<ActiveHand[]>([]);
     const [nextPlayerToPlay, setNextPlayerToPlay] = useState<number>(-1);
     const [canStartGame, setCanStartGame] = useState<boolean>(true);
     const [readyForNextRound, setReadyForNextRound] = useState<boolean>(false);
@@ -102,6 +103,18 @@ export const Game: FC = () => {
         }
     }, [gameID]);
 
+    const fetchActiveHand = useCallback(() => {
+        if (gameID) {
+            fetch(`${url}/api/Deck/${gameID}/gameID/getActiveHands`)
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.length !== 0) {
+                        setActiveHands(data);
+                    }
+                })
+        }
+    }, [gameID])
+
     const onBidUpdate = useCallback(
         (nextPlayer: number, previousBid: number, previousPlayer: number) => {
             setNextPlayerToBid(nextPlayer);
@@ -126,27 +139,18 @@ export const Game: FC = () => {
             previousCard: string
         ) => {
             setNextPlayerToPlay(nextPlayer);
-            var cards = playedCards;
-            cards[previousPlayer].push(previousCard);
-            setPlayedCards(cards);
-            if (nextPlayer === -1) {
-                fetchScores();
-            }
+            fetchActiveHand();
         },
-        [fetchScores, playedCards]
+        [fetchActiveHand]
     );
 
     const startNextRound = useCallback(() => {
         setReadyForNextRound(false);
-        var empty = [];
-        for (var i = 0; i < players.length; i++) {
-            empty.push([]);
-        }
-        setPlayedCards(empty);
+        setActiveHands([]);
         setBid(0);
         setBids([]);
         fetchBids();
-    }, [fetchBids, players.length]);
+    }, [fetchBids]);
 
     useEffect(() => {
         if (connection) {
@@ -194,15 +198,10 @@ export const Game: FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {playedCards.map((player, i) => (
+                                {players.map((player, i) => (
                                     <tr key={`player-${i}-cards`}>
-                                        <td>{players[i]}</td>
+                                        <td>{player}</td>
                                         <td>{bids[i]}</td>
-                                        {player.map((card, j) => (
-                                            <td key={`player-card-${j}`}>
-                                                {card}
-                                            </td>
-                                        ))}
                                     </tr>
                                 ))}
                             </tbody>
@@ -220,6 +219,60 @@ export const Game: FC = () => {
                 <div className="bidding">
                     <Bidding bid={bid} setBid={setBid} gameID={gameID} playerPosition={playerPosition} nextPlayerToBid={nextPlayerToBid} maxBid={cards.length} readyForNextRound={readyForNextRound}/>
                 </div>
+                <div className="played-cards">
+                            {activeHands.map((round, i) => (
+                                <div key={i}>
+                                    {round.playerOneCard && (
+                                        <img
+                                            className="card"
+                                            key={`playeroneplayed-${i}`}
+                                            src={require(`./Cards/${round.playerOneCard}.png`)}
+                                            alt=""
+                                        />
+                                    )}
+                                    {round.playerTwoCard && (
+                                        <img
+                                            className="card"
+                                            key={`playertwoplayed-${i}`}
+                                            src={require(`./Cards/${round.playerTwoCard}.png`)}
+                                            alt=""
+                                        />
+                                    )}
+                                    {round.playerThreeCard && (
+                                        <img
+                                            className="card"
+                                            key={`playerthreeplayed-${i}`}
+                                            src={require(`./Cards/${round.playerThreeCard}.png`)}
+                                            alt=""
+                                        />
+                                    )}
+                                    {round.playerFourCard &&  (
+                                        <img
+                                            className="card"
+                                            key={`playerfourplayed-${i}`}
+                                            src={require(`./Cards/${round.playerFourCard}.png`)}
+                                            alt=""
+                                        />
+                                    )}
+                                    {round.playerFiveCard && (
+                                        <img
+                                            className="card"
+                                            key={`playerfiveplayed-${i}`}
+                                            src={require(`./Cards/${round.playerFiveCard}.png`)}
+                                            alt=""
+                                        />
+                                    )}
+                                    {round.playerSixCard && (
+                                        <img
+                                            className="card"
+                                            key={`playersixplayed-${i}`}
+                                            src={require(`./Cards/${round.playerSixCard}.png`)}
+                                            alt=""
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                 <div className="startNextRound">
                     {readyForNextRound && (
                         <button onClick={startNextRound}>
