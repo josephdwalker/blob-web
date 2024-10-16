@@ -6,13 +6,13 @@ export interface BiddingProps {
     gameID?: string;
     bid: number,
     setBid: React.Dispatch<React.SetStateAction<number>>,
-    playerPosition?: number;
-    nextPlayerToBid: number;
+    playerPosition: number;
+    bids: number[];
     maxBid: number;
     readyForNextRound: boolean;
 }
 
-export const Bidding: FC<BiddingProps> = ({ gameID, bid, setBid, playerPosition, nextPlayerToBid, maxBid, readyForNextRound }) => {
+export const Bidding: FC<BiddingProps> = ({ gameID, bid, setBid, playerPosition, bids, maxBid, readyForNextRound }) => {
     const increment = useCallback(() => {
         if (bid < maxBid) {
             setBid(bid + 1);
@@ -26,19 +26,17 @@ export const Bidding: FC<BiddingProps> = ({ gameID, bid, setBid, playerPosition,
     }, [bid, setBid]);
 
     const submitBid = useCallback(async () => {
-        if (nextPlayerToBid === playerPosition) {
-            var response = await fetch(
-                `${url}/api/Bids/${gameID}/gameID/${playerPosition}/player/${bid}/bid/setBid`
-            ).then((response) => {
-                if (response.status === 400) {
-                    return response.text();
-                }
-            });
-            if (response) {
-                alert(response);
+        var response = await fetch(
+            `${url}/api/Bids/${gameID}/gameID/${playerPosition}/player/${bid}/bid/setBid`
+        ).then((response) => {
+            if (response.status === 400) {
+                return response.text();
             }
+        });
+        if (response) {
+            alert(response);
         }
-    }, [bid, gameID, nextPlayerToBid, playerPosition]);
+    }, [bid, gameID, playerPosition]);
 
     return (
         <div>
@@ -47,7 +45,7 @@ export const Bidding: FC<BiddingProps> = ({ gameID, bid, setBid, playerPosition,
                     id="increment"
                     onClick={increment}
                     disabled={
-                        nextPlayerToBid !== playerPosition ||
+                        bids[playerPosition] != null ||
                         readyForNextRound
                     }
                 >
@@ -58,7 +56,7 @@ export const Bidding: FC<BiddingProps> = ({ gameID, bid, setBid, playerPosition,
                     id="decrement"
                     onClick={decrement}
                     disabled={
-                        nextPlayerToBid !== playerPosition ||
+                        bids[playerPosition] != null ||
                         readyForNextRound
                     }
                 >
@@ -69,7 +67,7 @@ export const Bidding: FC<BiddingProps> = ({ gameID, bid, setBid, playerPosition,
                 <button
                     onClick={submitBid}
                     disabled={
-                        nextPlayerToBid !== playerPosition ||
+                        bids[playerPosition] != null ||
                         readyForNextRound
                     }
                 >
