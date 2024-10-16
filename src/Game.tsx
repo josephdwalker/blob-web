@@ -48,7 +48,11 @@ export const Game: FC = () => {
     const fetchCards = useCallback((position?: number) => {
         if (gameID && (playerPosition !== undefined || position !== undefined)) {
             fetch(`${url}/api/Deck/${gameID}/gameID/${playerPosition ?? position}/player/getHand`)
-                .then((response) => response.json())
+                .then((response) => {
+                    if (response.status === 200) {
+                        return response.json();
+                    }
+                })
                 .then((data) => {
                     if(data) {
                         setCards(data)
