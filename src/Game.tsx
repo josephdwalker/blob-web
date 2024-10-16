@@ -47,31 +47,36 @@ export const Game: FC = () => {
 
     const fetchCards = useCallback((position?: number) => {
         if (gameID && (playerPosition !== undefined || position !== undefined)) {
-            fetch(
-                `${url}/api/Deck/${gameID}/gameID/${playerPosition ?? position}/player/getHand`
-            )
+            fetch(`${url}/api/Deck/${gameID}/gameID/${playerPosition ?? position}/player/getHand`)
                 .then((response) => response.json())
-                .then((data) => {if(data) {setCards(data)}});
+                .then((data) => {
+                    if(data) {
+                        setCards(data)
+                    }
+                }
+            );
         }
     }, [gameID, playerPosition]);
 
-    const playCard = useCallback(
-        async (card: string) => {
-                var response = await fetch(
-                    `${url}/api/Deck/${gameID}/gameID/${playerPosition}/player/${card}/card/playCard`
-                ).then((response) => {
-                    if (response.status === 200) {
-                        var newCards = cards.filter((c) => c !== card);
-                        setCards(newCards);
-                    }
-                    if (response.status === 400) {
-                        return response.text();
-                    }
-                });
-                if (response) {
-                    alert(response);
+    const playCard = useCallback((card: string) => {
+        if (gameID) {
+            fetch(`${url}/api/Deck/${gameID}/gameID/${playerPosition}/player/${card}/card/playCard`)
+            .then((response) => {
+                if (response.status === 200) {
+                    var newCards = cards.filter((c) => c !== card);
+                    setCards(newCards);
                 }
-        },
+                if (response.status === 400) {
+                    return response.text();
+                }
+            })
+            .then(data => {
+                if (data) {
+                    alert(data)
+                }
+            });
+        }
+    },
         [cards, gameID, playerPosition]
     );
 
