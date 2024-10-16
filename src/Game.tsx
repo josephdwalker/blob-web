@@ -264,7 +264,7 @@ export const Game: FC = () => {
                     <h2>{players[nextPlayerToBid]} turn to bid</h2>
                 )}
                 <div className="bidding">
-                    <Bidding bid={bid} setBid={setBid} gameID={gameID} playerPosition={playerPosition ?? 0} bids={bids} maxBid={cards.length} readyForNextRound={readyForNextRound}/>
+                    <Bidding bid={bid} setBid={setBid} gameID={gameID} playerPosition={playerPosition ?? 0} nextPlayerToBid={nextPlayerToBid} maxBid={cards.length} readyForNextRound={readyForNextRound}/>
                 </div>
                 <div className="played-cards">
                             {activeHands.map((round, i) => (

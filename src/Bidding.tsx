@@ -7,12 +7,12 @@ export interface BiddingProps {
     bid: number,
     setBid: React.Dispatch<React.SetStateAction<number>>,
     playerPosition: number;
-    bids: number[];
+    nextPlayerToBid: number;
     maxBid: number;
     readyForNextRound: boolean;
 }
 
-export const Bidding: FC<BiddingProps> = ({ gameID, bid, setBid, playerPosition, bids, maxBid, readyForNextRound }) => {
+export const Bidding: FC<BiddingProps> = ({ gameID, bid, setBid, playerPosition, nextPlayerToBid, maxBid, readyForNextRound }) => {
     const increment = useCallback(() => {
         if (bid < maxBid) {
             setBid(bid + 1);
@@ -45,7 +45,7 @@ export const Bidding: FC<BiddingProps> = ({ gameID, bid, setBid, playerPosition,
                     id="increment"
                     onClick={increment}
                     disabled={
-                        bids[playerPosition] != null ||
+                        nextPlayerToBid !== playerPosition ||
                         readyForNextRound
                     }
                 >
@@ -56,7 +56,7 @@ export const Bidding: FC<BiddingProps> = ({ gameID, bid, setBid, playerPosition,
                     id="decrement"
                     onClick={decrement}
                     disabled={
-                        bids[playerPosition] != null ||
+                        nextPlayerToBid !== playerPosition ||
                         readyForNextRound
                     }
                 >
@@ -67,7 +67,7 @@ export const Bidding: FC<BiddingProps> = ({ gameID, bid, setBid, playerPosition,
                 <button
                     onClick={submitBid}
                     disabled={
-                        bids[playerPosition] != null ||
+                        nextPlayerToBid !== playerPosition ||
                         readyForNextRound
                     }
                 >
