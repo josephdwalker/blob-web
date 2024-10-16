@@ -28,14 +28,6 @@ export const Game: FC = () => {
 
     const connection = useSignalRConnection("/GameHub", username, gameID);
 
-    const onReceiveGameDetails = useCallback(
-        (players: string[]) => {
-            setPlayers(players);
-            setPlayerPosition(players.indexOf(username));
-        },
-        [username]
-    );
-
     const startGame = useCallback(() => {
         if (gameID) {
             fetch(`${url}/api/Score/startGame`, {
@@ -53,13 +45,13 @@ export const Game: FC = () => {
         }
     }, [gameID, players.length]);
 
-    const fetchCards = useCallback(() => {
-        if (gameID && playerPosition !== undefined) {
+    const fetchCards = useCallback((position?: number) => {
+        if (gameID && (playerPosition !== undefined || position !== undefined)) {
             fetch(
-                `${url}/api/Deck/${gameID}/gameID/${playerPosition}/player/getHand`
+                `${url}/api/Deck/${gameID}/gameID/${playerPosition ?? position}/player/getHand`
             )
                 .then((response) => response.json())
-                .then((data) => setCards(data));
+                .then((data) => {if(data) {setCards(data)}});
         }
     }, [gameID, playerPosition]);
 
@@ -199,6 +191,18 @@ export const Game: FC = () => {
         fetchBids();
     }, [fetchBids]);
 
+    const onReceiveGameDetails = useCallback(
+        (players: string[]) => {
+            setPlayers(players);
+            setPlayerPosition(players.indexOf(username));
+            fetchCards(players.indexOf(username));
+            fetchBids();
+            fetchActiveHand();
+            fetchScores();
+        },
+        [fetchActiveHand, fetchBids, fetchCards, fetchScores, username]
+    );
+
     useEffect(() => {
         if (connection) {
             connection.on("GameDetails", onReceiveGameDetails);
@@ -215,7 +219,7 @@ export const Game: FC = () => {
     return (
         <div>
             <div className="arena">
-                {canStartGame && (
+                {canStartGame && cards.length === 0 && bids.length === 0 && (
                     <button disabled={players.length < 2} onClick={startGame}>
                         Start Game
                     </button>
