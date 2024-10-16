@@ -136,12 +136,59 @@ export const Game: FC = () => {
         (
             nextPlayer: number,
             previousPlayer: number,
-            previousCard: string
+            previousCard: string,
+            leadingCard: boolean
         ) => {
             setNextPlayerToPlay(nextPlayer);
-            fetchActiveHand();
+            if (previousCard) {
+                var cards = activeHands;
+                if (leadingCard) {
+                    switch (previousPlayer) {
+                        case 0:
+                            cards.push({playerOneCard: previousCard});
+                            break;
+                        case 1:
+                            cards.push({playerTwoCard: previousCard});
+                            break;
+                        case 2:
+                            cards.push({playerThreeCard: previousCard});
+                            break;
+                        case 3:
+                            cards.push({playerFourCard: previousCard});
+                            break;
+                        case 4:
+                            cards.push({playerFiveCard: previousCard});
+                            break;
+                        case 5:
+                            cards.push({playerSixCard: previousCard});
+                            break;
+                    }
+                } else {
+                    switch (previousPlayer) {
+                        case 0:
+                            cards[cards.length-1].playerOneCard = previousCard;
+                            break;
+                        case 1:
+                            cards[cards.length-1].playerTwoCard = previousCard;
+                            break;
+                        case 2:
+                            cards[cards.length-1].playerThreeCard = previousCard;
+                            break;
+                        case 3:
+                            cards[cards.length-1].playerFourCard = previousCard;
+                            break;
+                        case 4:
+                            cards[cards.length-1].playerFiveCard = previousCard;
+                            break;
+                        case 5:
+                            cards[cards.length-1].playerSixCard = previousCard;
+                            break;
+                    }
+                }
+                setActiveHands(cards);
+            }
         },
-        [fetchActiveHand]
+        [activeHands]
     );
 
     const startNextRound = useCallback(() => {
